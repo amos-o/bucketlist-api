@@ -20,8 +20,9 @@ class User(db.Model):
     username = db.Column(db.String(250), unique=True)
     password = db.Column(db.String(250))
 
-    def __init__(self, username):
+    def __init__(self, username, password):
         self.username = username
+        self.password = password
 
     def __repr__(self):
         return '<User: {}>'.format(self.username)
@@ -33,12 +34,14 @@ class BucketList(db.Model):
     bid = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
-    date_modified = db.Column(db.DateIime, default=datetime.utcnow,
+    date_modified = db.Column(db.DateTime, default=datetime.utcnow,
                               onupdate=datetime.utcnow)
     created_by = db.Column(db.Integer, db.ForeignKey('user.uid'))
 
-    def __init__(self, name):
+    def __init__(self, name, created_by):
         self.name = name
+        self.created_by = created_by
+
 
     def __repr__(self):
         return '<Bucketlist: {}'.format(self.name)
@@ -50,13 +53,14 @@ class BucketListItem(db.Model):
     iid = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
-    date_modified = db.Column(db.DateIime, default=datetime.utcnow,
+    date_modified = db.Column(db.DateTime, default=datetime.utcnow,
                               onupdate=datetime.utcnow)
     done = db.Column(db.String(10), default='False')
     bid = db.Column(db.Integer, db.ForeignKey('bucket_list.bid'))
 
-    def __init__(self, name):
+    def __init__(self, name, bid):
         self.name = name
+        self.bid = bid
 
     def __repr__(self):
         return '<Bucketlist Item: {}'.format(self.name)
