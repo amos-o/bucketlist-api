@@ -53,7 +53,7 @@ class BucketListItem(db.Model):
     date_modified = db.Column(db.DateIime, default=datetime.utcnow,
                               onupdate=datetime.utcnow)
     done = db.Column(db.String(10), default='False')
-    bid = db.Column(db.Integer, db.ForeignKey('bucketlist.uid'))
+    bid = db.Column(db.Integer, db.ForeignKey('bucket_list.bid'))
 
     def __init__(self, name):
         self.name = name
