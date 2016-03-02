@@ -30,37 +30,37 @@ class User(db.Model):
 
 class BucketList(db.Model):
     """The bucketlist model class."""
-
+    __tablename__ = 'bucketlists'
     bid = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
-    date_modified = db.Column(db.DateTime, default=datetime.utcnow,
-                              onupdate=datetime.utcnow)
+    items = db.relationship('BucketListItem', backref='bucketlists', cascade="all", lazy="joined")
+    date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(),
+                              onupdate=db.func.current_timestamp())
     created_by = db.Column(db.Integer, db.ForeignKey('user.uid'))
 
     def __init__(self, name, created_by):
         self.name = name
         self.created_by = created_by
 
-
-    def __repr__(self):
-        return '<Bucketlist: {}'.format(self.name)
+    def __unicode__(self):
+        return '<Bucketlist": {}>'.format(self.name)
 
 
 class BucketListItem(db.Model):
-    """The bucketlist tiem model class."""
-
+    """The bucketlist item model class."""
+    __tablename__ = 'items'
     iid = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
-    date_modified = db.Column(db.DateTime, default=datetime.utcnow,
-                              onupdate=datetime.utcnow)
+    date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(),
+                              onupdate=db.func.current_timestamp())
     done = db.Column(db.String(10), default='False')
-    bid = db.Column(db.Integer, db.ForeignKey('bucket_list.bid'))
+    bid = db.Column(db.Integer, db.ForeignKey('bucketlists.bid'))
 
     def __init__(self, name, bid):
         self.name = name
         self.bid = bid
 
     def __repr__(self):
-        return '<Bucketlist Item: {}'.format(self.name)
+        return '<Bucketlist Item: {}>'.format(self.name)
