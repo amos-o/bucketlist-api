@@ -10,7 +10,7 @@ db.session.add(adminUser)
 db.session.commit()
 
 
-blist = BucketList("Life goals", 1)
+blist = BucketList("Life goals", 12345)
 
 db.session.add(blist)
 db.session.commit()
