@@ -19,6 +19,8 @@ class User(db.Model):
     uid = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(250), unique=True)
     password = db.Column(db.String(250))
+    bucketlists = db.relationship('BucketList', backref='user',
+                                  cascade="all", lazy="joined")
 
     def __init__(self, username, password):
         self.username = username
@@ -30,10 +32,12 @@ class User(db.Model):
 
 class BucketList(db.Model):
     """The bucketlist model class."""
+
     __tablename__ = 'bucketlists'
     bid = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
-    items = db.relationship('BucketListItem', backref='bucketlists', cascade="all", lazy="joined")
+    items = db.relationship('BucketListItem', backref='bucketlists',
+                            cascade="all", lazy="joined")
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
@@ -49,6 +53,7 @@ class BucketList(db.Model):
 
 class BucketListItem(db.Model):
     """The bucketlist item model class."""
+
     __tablename__ = 'items'
     iid = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250))
