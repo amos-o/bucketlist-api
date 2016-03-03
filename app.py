@@ -38,7 +38,7 @@ class Allbucketlists(Resource):
         return bucketlists
 
     def post(self):
-        """Create new bucket list."""
+        """Create a new bucketlist."""
         json_data = request.get_json()
 
         name = json_data['name']
@@ -53,12 +53,39 @@ class Allbucketlists(Resource):
 
 
 class Onebucketlist(Resource):
-    """Query one bucketlist by id."""
     @marshal_with(bucketlist_fields, envelope='bucketlists')
     def get(self, id):
+        """Query one bucketlist by ID."""
         bucketlist = BucketList.query.filter_by(bid=id).first()
 
         return bucketlist
+
+    @marshal_with(bucketlist_fields, envelope='bucketlists')
+    def put(self, id):
+        """Update one bucketlist using its ID."""
+        json_data = request.get_json()
+        bucketlist = BucketList.query.filter_by(bid=id).first()
+
+        if bucketlist is not None:
+            bucketlist.name = json_data['name']
+
+            db.session.add(bucketlist)
+            db.session.commit()
+
+            return bucketlist
+
+        return {"Error": "Bucketlist not found"}, 404
+
+    def delete(self, id):
+        """Delete a bucketlist using its ID."""
+        bucketlist = BucketList.query.get(id)
+
+        db.session.delete(bucketlist)
+        db.session.commit()
+
+        return jsonify({'message': 'Bucketlist ' + id +
+                        ' deleted successfully.'})
+
 
 api.add_resource(Allbucketlists, '/bucketlists/')
 api.add_resource(Onebucketlist, '/bucketlists/<id>')
