@@ -9,7 +9,6 @@ adminUser = User("amos", 12345)
 db.session.add(adminUser)
 db.session.commit()
 
-
 blist = BucketList("Life goals", 12345)
 
 db.session.add(blist)
