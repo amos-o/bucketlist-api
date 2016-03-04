@@ -11,7 +11,6 @@ api = Api(app)
 user_fields = OrderedDict()
 user_fields['name'] = fields.String
 
-
 item_fields = OrderedDict()
 item_fields['iid'] = fields.Integer
 item_fields['name'] = fields.String
@@ -87,8 +86,67 @@ class Onebucketlist(Resource):
                         ' deleted successfully.'})
 
 
+class Bucketlistitem(Resource):
+    @marshal_with(bucketlist_fields, envelope='bucketlists')
+    def post(self, id):
+        """Create a new bucketlist item."""
+        # get the data for new item from request
+        json_data = request.get_json()
+
+        # item data
+        itemname = json_data['name']
+
+        # create the new bucketlist item
+        newitem = BucketListItem(itemname, id)
+
+        # save the item in the database
+        db.session.add(newitem)
+        db.session.commit()
+
+        # get the updated bucketlist and return it
+        updatedBucketList = BucketList.query.filter_by(bid=id).first()
+
+        return updatedBucketList
+
+
+class Bucketitemsactions(Resource):
+    """Put and Delete methods for bucketlist items."""
+
+    @marshal_with(item_fields, envelope='item')
+    def put(self, id, item_id):
+        """Update a bucketlist item."""
+        # select the item from database for modification
+        item = BucketListItem.query.filter_by(bid=id, iid=item_id).first()
+
+        # get update data from request
+        json_data = request.get_json()
+
+        # update item
+        if item is not None:
+            item.name = json_data['name']
+
+            db.session.add(item)
+            db.session.commit()
+
+            return item
+
+        return {"Error": "Bucketlist item not found"}, 404
+
+    def delete(self, id, item_id):
+        """Delete a bucketlist item using its ID."""
+        item = BucketListItem.query.filter_by(bid=id, iid=item_id).first()
+
+        db.session.delete(item)
+        db.session.commit()
+
+        return jsonify({'message': 'Item ' + item_id +
+                        ' from bucketlist ' + id +
+                        ' deleted successfully.'})
+
 api.add_resource(Allbucketlists, '/bucketlists/')
 api.add_resource(Onebucketlist, '/bucketlists/<id>')
+api.add_resource(Bucketlistitem, '/bucketlists/<id>/items/')
+api.add_resource(Bucketitemsactions, '/bucketlists/<id>/items/<item_id>')
 
 if __name__ == '__main__':
     app.run(debug=True)
