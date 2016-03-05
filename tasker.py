@@ -4,12 +4,12 @@ from models.bucketlist_model import User, BucketList, BucketListItem
 
 db.create_all()
 
-adminUser = User("amos", 12345)
+adminUser = User("amos", "12345")
 
 db.session.add(adminUser)
 db.session.commit()
 
-blist = BucketList("Life goals", 12345)
+blist = BucketList("Life goals", 1)
 
 db.session.add(blist)
 db.session.commit()

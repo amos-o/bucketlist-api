@@ -2,6 +2,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import hashlib
 
 # create the flask app
 app = Flask(__name__)
@@ -22,12 +23,23 @@ class User(db.Model):
     bucketlists = db.relationship('BucketList', backref='user',
                                   cascade="all", lazy="joined")
 
+    def hash_password(self, password):
+        return hashlib.sha224(password).hexdigest()
+
     def __init__(self, username, password):
         self.username = username
-        self.password = password
+        self.password = self.hash_password(password)
 
     def __repr__(self):
         return '<User: {}>'.format(self.username)
+
+    def verify_password(self, password):
+        hashed_password = hashlib.sha224(password).hexdigest()
+
+        if hashed_password == self.password:
+            return True
+
+        return False
 
 
 class BucketList(db.Model):

@@ -28,6 +28,26 @@ bucketlist_fields['created_by'] = fields.Integer
 
 
 # API ROUTES #
+class Login(Resource):
+    def post(self):
+        """Login a user and return a token."""
+        # get user login data from request
+        json_data = request.get_json()
+
+        # set uname and pword
+        uname = json_data['username']
+        pword = json_data['password']
+
+        # select user from db based on username
+        user = User.query.filter_by(username=uname).first()
+
+        # check if the user's password matches the one entered
+        result = user.verify_password(pword)
+
+        # if result will be true, generate a token
+        return jsonify({"message": result})
+
+
 class Allbucketlists(Resource):
     @marshal_with(bucketlist_fields, envelope='bucketlists')
     def get(self):
@@ -147,6 +167,7 @@ api.add_resource(Allbucketlists, '/bucketlists/')
 api.add_resource(Onebucketlist, '/bucketlists/<id>')
 api.add_resource(Bucketlistitem, '/bucketlists/<id>/items/')
 api.add_resource(Bucketitemsactions, '/bucketlists/<id>/items/<item_id>')
+api.add_resource(Login, '/auth/login')
 
 if __name__ == '__main__':
     app.run(debug=True)
