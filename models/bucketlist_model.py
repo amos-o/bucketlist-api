@@ -3,6 +3,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import hashlib
+from itsdangerous import (TimedJSONWebSignatureSerializer
+                          as Serializer, BadSignature, SignatureExpired)
 
 # create the flask app
 app = Flask(__name__)
@@ -17,7 +19,7 @@ db = SQLAlchemy(app)
 class User(db.Model):
     """The user model class."""
 
-    uid = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(250), unique=True)
     password = db.Column(db.String(250))
     bucketlists = db.relationship('BucketList', backref='user',
@@ -41,6 +43,19 @@ class User(db.Model):
 
         return False
 
+    @staticmethod
+    def verify_auth_token(token):
+        """Verify token and return user object."""
+        s = Serializer('ilovemangoes')
+        try:
+            data = s.loads(token)
+        except SignatureExpired:
+            return None  # valid token, but expired
+        except BadSignature:
+            return None  # invalid token
+        user = User.query.get(data['id'])
+        return user
+
 
 class BucketList(db.Model):
     """The bucketlist model class."""
@@ -53,7 +68,7 @@ class BucketList(db.Model):
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
-    created_by = db.Column(db.Integer, db.ForeignKey('user.uid'))
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __init__(self, name, created_by):
         self.name = name
