@@ -3,6 +3,12 @@ from models.bucketlist_model import User, BucketList, BucketListItem, app, db
 from flask_restful import Resource, fields, Api, marshal_with
 from flask import request, jsonify
 from collections import OrderedDict
+from itsdangerous import (TimedJSONWebSignatureSerializer
+                          as Serializer, BadSignature, SignatureExpired)
+from flask.ext.httpauth import HTTPBasicAuth
+
+# create auth object
+auth = HTTPBasicAuth()
 
 # create the api object
 api = Api(app)
@@ -28,6 +34,23 @@ bucketlist_fields['created_by'] = fields.Integer
 
 
 # API ROUTES #
+@auth.verify_password
+def verify_password(token, password):
+    """Takes the token and verifies that it is valid."""
+    # authenticate by token
+    token = request.headers.get('Authorization')
+
+    if not token:
+        return False
+
+    user = User.verify_auth_token(token)
+
+    if user:
+        return True
+    else:
+        return False
+
+
 class Login(Resource):
     def post(self):
         """Login a user and return a token."""
@@ -45,10 +68,15 @@ class Login(Resource):
         result = user.verify_password(pword)
 
         # if result will be true, generate a token
-        return jsonify({"message": result})
+        if result:
+            s = Serializer("ilovemangoes", expires_in=6000)
+            return s.dumps({'id': user.id})
+
+        return jsonify({"message": "Invalid login details."})
 
 
 class Allbucketlists(Resource):
+    @auth.login_required
     @marshal_with(bucketlist_fields, envelope='bucketlists')
     def get(self):
         """Query all bucketlists."""
@@ -56,6 +84,7 @@ class Allbucketlists(Resource):
 
         return bucketlists
 
+    @auth.login_required
     def post(self):
         """Create a new bucketlist."""
         json_data = request.get_json()
@@ -72,6 +101,7 @@ class Allbucketlists(Resource):
 
 
 class Onebucketlist(Resource):
+    @auth.login_required
     @marshal_with(bucketlist_fields, envelope='bucketlists')
     def get(self, id):
         """Query one bucketlist by ID."""
@@ -79,6 +109,7 @@ class Onebucketlist(Resource):
 
         return bucketlist
 
+    @auth.login_required
     @marshal_with(bucketlist_fields, envelope='bucketlists')
     def put(self, id):
         """Update one bucketlist using its ID."""
@@ -95,6 +126,7 @@ class Onebucketlist(Resource):
 
         return {"Error": "Bucketlist not found"}, 404
 
+    @auth.login_required
     def delete(self, id):
         """Delete a bucketlist using its ID."""
         bucketlist = BucketList.query.get(id)
@@ -107,6 +139,7 @@ class Onebucketlist(Resource):
 
 
 class Bucketlistitem(Resource):
+    @auth.login_required
     @marshal_with(bucketlist_fields, envelope='bucketlists')
     def post(self, id):
         """Create a new bucketlist item."""
@@ -132,6 +165,7 @@ class Bucketlistitem(Resource):
 class Bucketitemsactions(Resource):
     """Put and Delete methods for bucketlist items."""
 
+    @auth.login_required
     @marshal_with(item_fields, envelope='item')
     def put(self, id, item_id):
         """Update a bucketlist item."""
@@ -152,6 +186,7 @@ class Bucketitemsactions(Resource):
 
         return {"Error": "Bucketlist item not found"}, 404
 
+    @auth.login_required
     def delete(self, id, item_id):
         """Delete a bucketlist item using its ID."""
         item = BucketListItem.query.filter_by(bid=id, iid=item_id).first()
