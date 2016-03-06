@@ -1,12 +1,12 @@
 """Import statements."""
 from models.bucketlist_model import User, BucketList, BucketListItem, app, db
-from flask_restful import Resource, fields, Api, marshal_with
+from flask_restful import Resource, Api, marshal_with
 from flask import request, jsonify, session
-from collections import OrderedDict
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 from flask.ext.httpauth import HTTPBasicAuth
-from random_string_generator import id_generator
+from helpers.random_string_generator import id_generator
+from helpers.marshal_fields import user_fields, item_fields, bucketlist_fields
 
 # create auth object
 auth = HTTPBasicAuth()
@@ -16,25 +16,6 @@ api = Api(app)
 
 # secret key to encrypt session variables
 app.secret_key = 'F12Zr47j\3yX R~X@H!jmM]Lwf/,?KT'
-
-# marshal fields
-user_fields = OrderedDict()
-user_fields['name'] = fields.String
-
-item_fields = OrderedDict()
-item_fields['iid'] = fields.Integer
-item_fields['name'] = fields.String
-item_fields['date_created'] = fields.DateTime
-item_fields['date_modified'] = fields.DateTime
-item_fields['done'] = fields.String
-
-bucketlist_fields = OrderedDict()
-bucketlist_fields['bid'] = fields.Integer
-bucketlist_fields['name'] = fields.String
-bucketlist_fields['items'] = fields.Nested(item_fields)
-bucketlist_fields['date_created'] = fields.DateTime
-bucketlist_fields['date_modified'] = fields.DateTime
-bucketlist_fields['created_by'] = fields.Integer
 
 
 # API ROUTES #
