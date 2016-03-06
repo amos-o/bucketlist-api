@@ -73,6 +73,7 @@ class Login(Resource):
 
         # if result will be true, generate a token
         if result:
+            session['user_id'] = user.id
             session['serializer_key'] = id_generator()
 
             s = Serializer(session['serializer_key'], expires_in=6000)
@@ -86,6 +87,7 @@ class Logout(Resource):
     def get(self):
         # replace the serializer_key with an invalid one
         session['serializer_key'] = id_generator()
+        del session['user_id']
 
         return jsonify({"message": "You have been logged out successfully."})
 
@@ -105,7 +107,7 @@ class Allbucketlists(Resource):
         json_data = request.get_json()
 
         name = json_data['name']
-        uid = json_data['uid']
+        uid = session['user_id']
 
         blist = BucketList(name, uid)
 
