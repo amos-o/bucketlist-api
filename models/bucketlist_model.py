@@ -1,5 +1,5 @@
 """Import statements."""
-from flask import Flask
+from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import hashlib
@@ -46,7 +46,7 @@ class User(db.Model):
     @staticmethod
     def verify_auth_token(token):
         """Verify token and return user object."""
-        s = Serializer('ilovemangoes')
+        s = Serializer(session['serializer_key'])
         try:
             data = s.loads(token)
         except SignatureExpired:

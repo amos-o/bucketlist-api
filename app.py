@@ -1,17 +1,21 @@
 """Import statements."""
 from models.bucketlist_model import User, BucketList, BucketListItem, app, db
 from flask_restful import Resource, fields, Api, marshal_with
-from flask import request, jsonify
+from flask import request, jsonify, session
 from collections import OrderedDict
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 from flask.ext.httpauth import HTTPBasicAuth
+from random_string_generator import id_generator
 
 # create auth object
 auth = HTTPBasicAuth()
 
 # create the api object
 api = Api(app)
+
+# secret key to encrypt session variables
+app.secret_key = 'F12Zr47j\3yX R~X@H!jmM]Lwf/,?KT'
 
 # marshal fields
 user_fields = OrderedDict()
@@ -69,10 +73,21 @@ class Login(Resource):
 
         # if result will be true, generate a token
         if result:
-            s = Serializer("ilovemangoes", expires_in=6000)
+            session['serializer_key'] = id_generator()
+
+            s = Serializer(session['serializer_key'], expires_in=6000)
             return s.dumps({'id': user.id})
 
         return jsonify({"message": "Invalid login details."})
+
+
+class Logout(Resource):
+    @auth.login_required
+    def get(self):
+        # replace the serializer_key with an invalid one
+        session['serializer_key'] = id_generator()
+
+        return jsonify({"message": "You have been logged out successfully."})
 
 
 class Allbucketlists(Resource):
@@ -203,6 +218,7 @@ api.add_resource(Onebucketlist, '/bucketlists/<id>')
 api.add_resource(Bucketlistitem, '/bucketlists/<id>/items/')
 api.add_resource(Bucketitemsactions, '/bucketlists/<id>/items/<item_id>')
 api.add_resource(Login, '/auth/login')
+api.add_resource(Logout, '/auth/logout')
 
 if __name__ == '__main__':
     app.run(debug=True)
