@@ -1,6 +1,6 @@
 """Import statements."""
 from models.bucketlist_model import User, BucketList, BucketListItem, app, db
-from flask_restful import Resource, Api, marshal_with
+from flask_restful import Resource, Api, marshal_with, marshal
 from flask import request, jsonify, session
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
@@ -21,7 +21,7 @@ app.secret_key = 'F12Zr47j\3yX R~X@H!jmM]Lwf/,?KT'
 # API ROUTES #
 @auth.verify_password
 def verify_password(token, password):
-    """Takes the token and verifies that it is valid."""
+    """Take the token and verify that it is valid."""
     # authenticate by token
     token = request.headers.get('Authorization')
 
@@ -42,9 +42,12 @@ class Login(Resource):
         # get user login data from request
         json_data = request.get_json()
 
-        # set uname and pword
-        uname = json_data['username']
-        pword = json_data['password']
+        if "username" in json_data and "password" in json_data:
+            # set uname and pword
+            uname = json_data['username']
+            pword = json_data['password']
+        else:
+            return {"message": "Provide both a username and a password."}, 401
 
         # select user from db based on username
         user = User.query.filter_by(username=uname).first()
@@ -55,7 +58,7 @@ class Login(Resource):
         # if result will be true, generate a token
         if result:
             session['user_id'] = user.id
-            print session['user_id']
+
             session['serializer_key'] = id_generator()
 
             s = Serializer(session['serializer_key'], expires_in=6000)
@@ -134,7 +137,6 @@ class Allbucketlists(Resource):
 
 class Onebucketlist(Resource):
     @auth.login_required
-    @marshal_with(bucketlist_fields, envelope='bucketlist')
     def get(self, id):
         """Query one bucketlist by ID."""
         # get id of logged in user
@@ -142,15 +144,12 @@ class Onebucketlist(Resource):
 
         bucketlist = BucketList.query.filter_by(created_by=uid, bid=id).first()
 
-        print bucketlist
-
         if bucketlist is not None:
-            return bucketlist
+            return marshal(bucketlist, bucketlist_fields)
 
         return {"Error": "Nothing found"}, 404
 
     @auth.login_required
-    @marshal_with(bucketlist_fields, envelope='bucketlist')
     def put(self, id):
         """Update one bucketlist using its ID."""
         # get id of logged in user
@@ -165,7 +164,7 @@ class Onebucketlist(Resource):
             db.session.add(bucketlist)
             db.session.commit()
 
-            return bucketlist
+            return marshal(bucketlist, bucketlist_fields)
 
         return {"Error": "Bucketlist not found"}, 404
 
@@ -188,8 +187,19 @@ class Onebucketlist(Resource):
 
 
 class Bucketlistitem(Resource):
+    """
+    Handle creation of new bucketlist items.
+
+    Resource url:
+        '/bucketlists/<id>/items/'
+    Endpoint:
+        'items'
+
+    Requests Allowed:
+        POST
+    """
+
     @auth.login_required
-    @marshal_with(bucketlist_fields, envelope='bucketlists')
     def post(self, id):
         """Create a new bucketlist item."""
         # get id of logged in user
@@ -208,7 +218,8 @@ class Bucketlistitem(Resource):
             # create the new bucketlist item
             newitem = BucketListItem(itemname, id)
         else:
-            return jsonify({"message": "You do not own a bucketlist with id " + str(id)})
+            return {"message": "You do not own a"
+                    " " + "bucketlist with id " + str(id)}, 401
 
         # save the item in the database
         db.session.add(newitem)
@@ -218,14 +229,14 @@ class Bucketlistitem(Resource):
         updatedBucketList = \
             BucketList.query.filter_by(created_by=uid, bid=id).first()
 
-        return updatedBucketList
+        return marshal(updatedBucketList, bucketlist_fields)
 
 
 class Bucketitemsactions(Resource):
     """Put and Delete methods for bucketlist items."""
 
     @auth.login_required
-    @marshal_with(item_fields, envelope='item')
+    # @marshal_with(item_fields, envelope='item')
     def put(self, id, item_id):
         """Update a bucketlist item."""
         # get id of logged in user
@@ -248,7 +259,7 @@ class Bucketitemsactions(Resource):
                 db.session.add(item)
                 db.session.commit()
 
-                return item
+                return marshal(item, item_fields)
 
         return {"Error": "Bucketlist item not found"}, 404
 
@@ -264,11 +275,27 @@ class Bucketitemsactions(Resource):
         if bucketlist:
             item = BucketListItem.query.filter_by(bid=id, iid=item_id).first()
 
-            db.session.delete(item)
-            db.session.commit()
+            if item:
+                db.session.delete(item)
+                db.session.commit()
 
-            return jsonify({'message': 'Item ' + item_id +
-                            ' from bucketlist ' + id +
-                            ' deleted successfully.'})
+                return jsonify({'message': 'Item ' + item_id +
+                                ' from bucketlist ' + id +
+                                ' deleted successfully.'})
+            else:
+                return {"Error": "Bucketlist has"
+                        " " + "no item with id " + str(item_id)}, 404
 
-        return {"Error": "Bucketlist item not found"}, 404
+        return {"Error": "Bucketlist not found"}, 404
+
+# ADD RESOURCES TO API OBJECT
+api.add_resource(Allbucketlists, '/bucketlists/', endpoint='bucketlists')
+api.add_resource(Onebucketlist, '/bucketlists/<id>', endpoint='bucketlist')
+api.add_resource(Bucketlistitem, '/bucketlists/<id>/items/', endpoint='items')
+api.add_resource(Bucketitemsactions, '/bucketlists/<id>/items/<item_id>', endpoint='item')
+api.add_resource(Login, '/auth/login', endpoint='login')
+api.add_resource(Logout, '/auth/logout', endpoint='logout')
+
+# APP RUNNER
+if __name__ == '__main__':
+    app.run(debug=True)
