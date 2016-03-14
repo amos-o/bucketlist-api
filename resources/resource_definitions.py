@@ -292,10 +292,7 @@ class Bucketitemsactions(Resource):
 api.add_resource(Allbucketlists, '/bucketlists/', endpoint='bucketlists')
 api.add_resource(Onebucketlist, '/bucketlists/<id>', endpoint='bucketlist')
 api.add_resource(Bucketlistitem, '/bucketlists/<id>/items/', endpoint='items')
-api.add_resource(Bucketitemsactions, '/bucketlists/<id>/items/<item_id>', endpoint='item')
+api.add_resource(Bucketitemsactions, '/bucketlists/<id>/items/<item_id>',
+                 endpoint='item')
 api.add_resource(Login, '/auth/login', endpoint='login')
 api.add_resource(Logout, '/auth/logout', endpoint='logout')
-
-# APP RUNNER
-if __name__ == '__main__':
-    app.run(debug=True)
