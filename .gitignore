@@ -1,3 +1,5 @@
 env/
 *.db
 *.pyc
+.DS_Store
+.coverage
