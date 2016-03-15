@@ -5,12 +5,13 @@ from datetime import datetime
 import hashlib
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
+from config.config import DevelopmentConfig
 
 # create the flask app
 app = Flask(__name__)
 
-# configure app database uri
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bucketlist.db'
+# configure app
+app.config.from_object(DevelopmentConfig)
 
 # create a database object instance
 db = SQLAlchemy(app)
