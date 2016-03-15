@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/andela-aomondi/bucketlist-api.svg?branch=develop)](https://travis-ci.org/andela-aomondi/bucketlist-api)
 
 # Bucketlist API
 
