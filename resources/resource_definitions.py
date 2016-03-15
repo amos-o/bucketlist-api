@@ -14,9 +14,6 @@ auth = HTTPBasicAuth()
 # create the api object
 api = Api(app)
 
-# secret key to encrypt session variables
-app.secret_key = 'F12Zr47j\3yX R~X@H!jmM]Lwf/,?KT'
-
 
 # API ROUTES #
 @auth.verify_password
