@@ -2,6 +2,7 @@
 import nose
 from flask_testing import TestCase
 from models.bucketlist_model import app, db
+from config.config import TestingConfig
 
 
 class BaseTestCase(TestCase):
@@ -9,9 +10,7 @@ class BaseTestCase(TestCase):
 
     def create_app(self):
         """Set config options for the test app."""
-        app.config['TESTING'] = True
-        app.config['DEBUG'] = True
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config.from_object(TestingConfig)
         return app
 
     def setUp(self):
