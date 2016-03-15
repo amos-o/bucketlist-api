@@ -6,7 +6,7 @@ from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 from flask.ext.httpauth import HTTPBasicAuth
 from helpers.random_string_generator import id_generator
-from helpers.marshal_fields import user_fields, item_fields, bucketlist_fields
+from helpers.marshal_fields import item_fields, bucketlist_fields
 
 # create auth object
 auth = HTTPBasicAuth()

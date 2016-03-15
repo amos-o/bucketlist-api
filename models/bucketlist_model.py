@@ -1,7 +1,6 @@
 """Import statements."""
 from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 import hashlib
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
