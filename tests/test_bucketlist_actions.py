@@ -169,7 +169,7 @@ class TestBucketlistActions(BaseTestCase):
         self.assertIn("Life goals forever", updated_bucketlist.data)
 
     def test_authorized_user_can_delete_a_bucketlist(self):
-        """Test a user can delete a bucketlist."""
+        """Test that a user can delete a bucketlist."""
         # login and get the token
         response = self.login()
         token = json.loads(response.data)
