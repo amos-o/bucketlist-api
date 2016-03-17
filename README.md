@@ -24,7 +24,7 @@ This is a bucketlist API made using the Python Flask library.
 
 
 # Set up
-* In the project root folder, follow the following instructions:
+In the project root folder, follow the following instructions:
 
   1. Create a virtual environment by running the command `virtualenv venv`.
 
@@ -43,11 +43,17 @@ This is a bucketlist API made using the Python Flask library.
 * In the project root folder, run command `nosetests`.
 
 # Acknowledgements
+This project is built using functionality from the following awesome 3rd party libraries:
+
+  1. [Flask](http://flask.pocoo.org/)
+  2. [flask-restful](http://flask-restful-cn.readthedocs.org/en/0.3.4/)
+  3. [flask-sqlalchemy](http://flask-sqlalchemy.pocoo.org/2.1/)
+  4. [itsdangerous](http://pythonhosted.org/itsdangerous/) 
 
 # License
 The MIT License
 
-Copyright (c) 2015 Amos Omondi
+Copyright (c) 2016 Amos Omondi
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
