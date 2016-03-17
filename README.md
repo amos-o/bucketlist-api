@@ -12,6 +12,17 @@ This is a bucketlist API made using the Python Flask library.
 
 # Endpoints
 
+| Endpoint             	| Functionality                     	|
+|----------------------	|-----------------------------------	|
+| POST /auth/login     	| Logs a user in                    	|
+| GET /auth/logout     	| Logs a user out                   	|
+| POST /bucketlists/   	| Create a new bucket list          	|
+| GET /bucketlists/    	| List all the created bucket lists 	|
+| GET /bucketlists/    	| Get single bucket lis             	|
+| PUT /bucketlists/    	| Update this bucket list           	|
+| DELETE /bucketlists/ 	| Delete this single bucket list    	|
+
+
 # Set up
 * In the project root folder, follow the following instructions:
 
@@ -24,7 +35,7 @@ This is a bucketlist API made using the Python Flask library.
 
   4. Run the command `python tasker.py` to create the database with dummy users
   and data.
-  
+
   5. Run the command `python app.py` to start the server. The application will
   then be live at **http://localhost:5000/**
 
