@@ -33,6 +33,14 @@ def verify_password(token, password):
         return False
 
 
+class Home(Resource):
+    def get(self):
+        return jsonify({"message": "Welcome to the bucketlist API."
+                        "" + " Send a POST request to /auth/login "
+                        "" + "with your login details "
+                        "" + "to get started."})
+
+
 class Login(Resource):
     def post(self):
         """Login a user and return a token."""
@@ -286,6 +294,7 @@ class Bucketitemsactions(Resource):
         return {"Error": "Bucketlist not found"}, 404
 
 # ADD RESOURCES TO API OBJECT
+api.add_resource(Home, '/', endpoint='home')
 api.add_resource(Allbucketlists, '/bucketlists/', endpoint='bucketlists')
 api.add_resource(Onebucketlist, '/bucketlists/<id>', endpoint='bucketlist')
 api.add_resource(Bucketlistitem, '/bucketlists/<id>/items/', endpoint='items')
