@@ -3,7 +3,7 @@ import json
 import unittest
 
 from resources.resource_definitions import api, Allbucketlists, Login, \
-    Logout, Onebucketlist
+    Logout, Onebucketlist, Home
 
 from base import BaseTestCase
 
@@ -50,6 +50,13 @@ class TestBucketlistActions(BaseTestCase):
                         )
 
         return logout_response
+
+    def test_accessing_home_returns_welcome_message(self):
+        response = self.client.get(api.url_for(Home))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Welcome to the bucketlist API.', response.data)
+
 
     def test_unlogged_in_user_cant_access_bucketlists(self):
         """Test that an unlogged in user can't access bucketlists resource."""
