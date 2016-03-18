@@ -1,12 +1,20 @@
 [![Build Status](https://travis-ci.org/andela-aomondi/bucketlist-api.svg?branch=develop)](https://travis-ci.org/andela-aomondi/bucketlist-api)
 [![Coverage Status](https://coveralls.io/repos/github/andela-aomondi/bucketlist-api/badge.svg?branch=develop)](https://coveralls.io/github/andela-aomondi/bucketlist-api?branch=develop)
 [![Code Health](https://landscape.io/github/andela-aomondi/bucketlist-api/develop/landscape.svg?style=flat)](https://landscape.io/github/andela-aomondi/bucketlist-api/develop)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/hyperium/hyper/master/LICENSE)
 
 # Bucketlist API
 
 This is a bucketlist API made using the Python Flask library.
 
 # Features
+The API has the following features which can be accessed by registered users.
+
+  1. A user can log in and get an authorization token for any other requests.
+    Logging out destroys the users token.
+  2. Creating, deleting and updating bucketlists.
+  3. Creating, deleting and updating items inside bucketlists.
+  4. Viewing bucketlists owned by the logged in user.
 
 # Usage
 
@@ -24,6 +32,7 @@ This is a bucketlist API made using the Python Flask library.
 
 
 # Set up
+
 In the project root folder, follow the following instructions:
 
   1. Create a virtual environment by running the command `virtualenv venv`.
@@ -40,17 +49,20 @@ In the project root folder, follow the following instructions:
   then be live at **http://localhost:5000/**
 
 # Testing
-* In the project root folder, run command `nosetests`.
+
+In the project root folder, run command `nosetests`.
 
 # Acknowledgements
+
 This project is built using functionality from the following awesome 3rd party libraries:
 
   1. [Flask](http://flask.pocoo.org/)
   2. [flask-restful](http://flask-restful-cn.readthedocs.org/en/0.3.4/)
   3. [flask-sqlalchemy](http://flask-sqlalchemy.pocoo.org/2.1/)
-  4. [itsdangerous](http://pythonhosted.org/itsdangerous/) 
+  4. [itsdangerous](http://pythonhosted.org/itsdangerous/)
 
 # License
+
 The MIT License
 
 Copyright (c) 2016 Amos Omondi
