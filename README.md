@@ -18,6 +18,21 @@ The API has the following features which can be accessed by registered users.
 
 # Usage
 
+A sample request to the home page looks as follows:
+
+```
+curl -i -H 'Accept: application/json' 'http://localhost:5000/'
+HTTP/1.0 200 OK
+Content-Type: application/json
+Content-Length: 124
+Server: Werkzeug/0.11.4 Python/2.7.11
+Date: Sun, 20 Mar 2016 09:01:07 GMT
+
+{
+  "message": "Welcome to the bucketlist API. Send a POST request to /auth/login with your login details to get started."
+}
+```
+
 # Endpoints
 
 | Endpoint             	| Functionality                     	|
