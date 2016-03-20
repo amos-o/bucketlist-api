@@ -18,7 +18,17 @@ api = Api(app)
 # API ROUTES #
 @auth.verify_password
 def verify_password(token, password):
-    """Take the token and verify that it is valid."""
+    """
+    Take the token or password and verify that it is valid.
+
+    Args:
+        token: The token generated
+        password: (optional) The users password
+
+    Returns:
+        True if user exists and token is valid
+        False if user is nonexistent or token is invalid
+    """
     # authenticate by token
     token = request.headers.get('Authorization')
 
@@ -34,7 +44,29 @@ def verify_password(token, password):
 
 
 class Home(Resource):
+    """
+    Handles requests to home route.
+
+    Resource url:
+        '/'
+
+    Endpoint:
+        'home'
+
+    Requests Allowed:
+        GET
+    """
+
     def get(self):
+        """
+        Handle get requests to home route '/'
+
+        Args:
+            self
+
+        Returns:
+            A json encoded welcome message
+        """
         return jsonify({"message": "Welcome to the bucketlist API."
                         "" + " Send a POST request to /auth/login "
                         "" + "with your login details "
@@ -42,8 +74,32 @@ class Home(Resource):
 
 
 class Login(Resource):
+    """
+    Handles login requests.
+
+    Resource url:
+        '/auth/login'
+
+    Endpoint:
+        'login'
+
+    Requests Allowed:
+        'POST'
+    """
+
     def post(self):
-        """Login a user and return a token."""
+        """
+        Login a user and return a token.
+
+        Args:
+            self
+
+        Returns:
+            A token to be used for every request
+
+        Raises:
+            401 error when invalid credentials given
+        """
         # get user login data from request
         json_data = request.get_json()
 
@@ -73,8 +129,30 @@ class Login(Resource):
 
 
 class Logout(Resource):
+    """
+    Handles logout requests.
+
+    Resource url:
+        '/auth/logout'
+
+    Endpoint:
+        'logout'
+
+    Requests Allowed:
+        'GET'
+    """
+
     @auth.login_required
     def get(self):
+        """
+        Logout a user and return a message.
+
+        Args:
+            self
+
+        Returns:
+            A success message on logout.
+        """
         # replace the serializer_key with an invalid one
         session['serializer_key'] = id_generator()
         del session['user_id']
@@ -83,10 +161,31 @@ class Logout(Resource):
 
 
 class Allbucketlists(Resource):
+    """
+    Handles actions on bucketlists.
+
+    Resource url:
+        '/bucketlists/'
+
+    Endpoint:
+        'bucketlists'
+
+    Requests Allowed:
+        'GET', 'POST'
+    """
+
     @auth.login_required
     @marshal_with(bucketlist_fields, envelope='bucketlists')
     def get(self):
-        """Query all bucketlists."""
+        """
+        Query all bucketlists.
+
+        Args:
+            self
+
+        Return:
+            All bucketlists belonging to the logged in user.
+        """
         # get id of logged in user
         uid = session['user_id']
 
@@ -121,7 +220,15 @@ class Allbucketlists(Resource):
 
     @auth.login_required
     def post(self):
-        """Create a new bucketlist."""
+        """
+        Create a new bucketlist.
+
+        Args:
+            self
+
+        Returns:
+            A message on success.
+        """
         # get data from json request
         json_data = request.get_json()
 
@@ -141,9 +248,34 @@ class Allbucketlists(Resource):
 
 
 class Onebucketlist(Resource):
+    """
+    Handle actions on individual bucketlists.
+
+    Resource url:
+        '/bucketlists/<id>'
+
+    Endpoint:
+        'bucketlist'
+
+    Requests Allowed:
+        'GET', 'DELET','PUT'
+    """
+
     @auth.login_required
     def get(self, id):
-        """Query one bucketlist by ID."""
+        """
+        Query one bucketlist by ID.
+
+        Args:
+            self
+            id: The bucketlist id
+
+        Returns:
+            The required bucketlist details.
+
+        Raises:
+            404 nothing found error.
+        """
         # get id of logged in user
         uid = session['user_id']
 
@@ -156,7 +288,19 @@ class Onebucketlist(Resource):
 
     @auth.login_required
     def put(self, id):
-        """Update one bucketlist using its ID."""
+        """
+        Update one bucketlist using its ID.
+
+        Args:
+            self
+            id: ID of the bucketlist to be updated.
+
+        Returns:
+            The updated bucketlist details.
+
+        Raises:
+            404 bucketlist not found error.
+        """
         # get id of logged in user
         uid = session['user_id']
 
@@ -175,7 +319,19 @@ class Onebucketlist(Resource):
 
     @auth.login_required
     def delete(self, id):
-        """Delete a bucketlist using its ID."""
+        """
+        Delete a bucketlist using its ID.
+
+        Args:
+            self
+            id: ID of bucketlist to be deleted.
+
+        Returns:
+            A message on successful delete operation.
+
+        Raises:
+            404 bucketlist not found error.
+        """
         # get id of logged in user
         uid = session['user_id']
 
@@ -197,16 +353,29 @@ class Bucketlistitem(Resource):
 
     Resource url:
         '/bucketlists/<id>/items/'
+
     Endpoint:
         'items'
 
     Requests Allowed:
-        POST
+        'POST'
     """
 
     @auth.login_required
     def post(self, id):
-        """Create a new bucketlist item."""
+        """
+        Create a new bucketlist item.
+
+        Args:
+            self
+            id: ID of the bucketlist item is to be created in.
+
+        Returns:
+            The updated bucketlist showing the new item added.
+
+        Raises:
+            401 error if user doesn't own a bucketlist with the given ID.
+        """
         # get id of logged in user
         uid = session['user_id']
 
@@ -238,12 +407,35 @@ class Bucketlistitem(Resource):
 
 
 class Bucketitemsactions(Resource):
-    """Put and Delete methods for bucketlist items."""
+    """
+    Handle actions on bucketlist items.
+
+    Resource url:
+        '/bucketlists/<id>/items/<item_id>'
+
+    Endpoint:
+        'item'
+
+    Requests allowed:
+        'PUT', 'DEL'
+    """
 
     @auth.login_required
-    # @marshal_with(item_fields, envelope='item')
     def put(self, id, item_id):
-        """Update a bucketlist item."""
+        """
+        Update a bucketlist item.
+
+        Args:
+            self
+            id: The id of the bucketlist item belongs to.
+            item_id: The ID of the item to be deleted.
+
+        Returns:
+            The updated item.
+
+        Raises:
+            404 error if the bucketlist is not found.
+        """
         # get id of logged in user
         uid = session['user_id']
 
@@ -270,7 +462,20 @@ class Bucketitemsactions(Resource):
 
     @auth.login_required
     def delete(self, id, item_id):
-        """Delete a bucketlist item using its ID."""
+        """
+        Delete a bucketlist item using its ID.
+
+        Args:
+            self
+            id: The id of the bucketlist item belongs to.
+            item_id: The ID of the item to be deleted.
+
+        Returns;
+            Message on success.
+
+        Raises:
+            404 error if bucketlist or the item are not found.
+        """
         # get id of logged in user
         uid = session['user_id']
 
