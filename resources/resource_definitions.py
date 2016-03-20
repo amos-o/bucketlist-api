@@ -451,7 +451,12 @@ class Bucketitemsactions(Resource):
 
             # update item
             if item is not None:
-                item.name = json_data['name']
+                if 'name' in json_data:
+                    item.name = json_data['name']
+
+                if 'done' in json_data:
+                    if json_data['done'] == "True":
+                        item.done = json_data['done']
 
                 db.session.add(item)
                 db.session.commit()
