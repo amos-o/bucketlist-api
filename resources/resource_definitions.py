@@ -188,19 +188,25 @@ class Allbucketlists(Resource):
         # get id of logged in user
         uid = session['user_id']
         # if limit exists, assign it to limit
-        limit = request.args.get('limit')
+        try:
+            limit = int(request.args.get('limit', 20))
+
+            if limit < 20:
+                limit = 20
+
+            if limit > 100:
+                limit = 100
+        except:
+            limit = 20
         # if q exists, assign it to q
         q = request.args.get('q')
+        # if page exists, assign it to page
+        try:
+            page = int(request.args.get('page'))
+        except:
+            page = 1
 
-        if limit is not None:
-            if limit == 0:
-                return jsonify({"Error": "Limit cannot be 0."})
-
-            bucketlists = BucketList.query.filter_by(created_by=uid). \
-                limit(limit).all()
-
-            return marshal(bucketlists, bucketlist_serializer)
-
+        # when q is defined, search for relevant bucketlists
         if q is not None:
             bucketlists = BucketList.query.filter_by(created_by=uid).all()
 
@@ -215,7 +221,7 @@ class Allbucketlists(Resource):
 
         # if limit and search query are not specified,
         # query and return all bucketlists
-        bucketlists = BucketList.query.filter_by(created_by=uid).all()
+        bucketlists = BucketList.query.filter_by(created_by=uid).paginate(page, limit, False).items
 
         return marshal(bucketlists, bucketlist_serializer)
 
