@@ -123,7 +123,8 @@ class Login(Resource):
             session['serializer_key'] = id_generator()
 
             s = Serializer(session['serializer_key'], expires_in=6000)
-            return s.dumps({'id': user.id})
+            token = s.dumps({'id': user.id})
+            return jsonify({"token": token})
 
         return jsonify({"message": "Invalid login details."})
 
@@ -191,7 +192,7 @@ class Allbucketlists(Resource):
         try:
             limit = int(request.args.get('limit', 20))
 
-            if limit < 20:
+            if limit < 1:
                 limit = 20
 
             if limit > 100:
