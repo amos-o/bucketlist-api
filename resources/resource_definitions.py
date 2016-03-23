@@ -120,7 +120,6 @@ class Login(Resource):
         # if result will be true, generate a token
         if result:
             session['user_id'] = user.id
-
             session['serializer_key'] = id_generator()
 
             s = Serializer(session['serializer_key'], expires_in=6000)
@@ -176,7 +175,6 @@ class Allbucketlists(Resource):
     """
 
     @auth.login_required
-    @marshal_with(bucketlist_serializer, envelope='bucketlists')
     def get(self):
         """
         Query all bucketlists.
@@ -189,17 +187,19 @@ class Allbucketlists(Resource):
         """
         # get id of logged in user
         uid = session['user_id']
-
         # if limit exists, assign it to limit
         limit = request.args.get('limit')
         # if q exists, assign it to q
         q = request.args.get('q')
 
         if limit is not None:
+            if limit == 0:
+                return jsonify({"Error": "Limit cannot be 0."})
+
             bucketlists = BucketList.query.filter_by(created_by=uid). \
                 limit(limit).all()
 
-            return bucketlists
+            return marshal(bucketlists, bucketlist_serializer)
 
         if q is not None:
             bucketlists = BucketList.query.filter_by(created_by=uid).all()
@@ -211,13 +211,13 @@ class Allbucketlists(Resource):
                 if q in bucket.name:
                     listOfResults.append(bucket)
 
-            return listOfResults
+            return marshal(listOfResults, bucketlist_serializer)
 
         # if limit and search query are not specified,
         # query and return all bucketlists
         bucketlists = BucketList.query.filter_by(created_by=uid).all()
 
-        return bucketlists
+        return marshal(bucketlists, bucketlist_serializer)
 
     @auth.login_required
     def post(self):
@@ -232,7 +232,6 @@ class Allbucketlists(Resource):
         """
         # get data from json request
         json_data = request.get_json()
-
         # get name of bucketlist from json data
         name = json_data['name']
         # get owner id from logged in user session
@@ -304,8 +303,8 @@ class Onebucketlist(Resource):
         """
         # get id of logged in user
         uid = session['user_id']
-
         json_data = request.get_json()
+
         bucketlist = BucketList.query.filter_by(created_by=uid, bid=id).first()
 
         if bucketlist is not None:
@@ -379,10 +378,8 @@ class Bucketlistitem(Resource):
         """
         # get id of logged in user
         uid = session['user_id']
-
         # get the data for new item from request
         json_data = request.get_json()
-
         # item data
         itemname = json_data['name']
 
@@ -439,14 +436,12 @@ class Bucketitemsactions(Resource):
         """
         # get id of logged in user
         uid = session['user_id']
-
         # select the item from database for modification
         bucketlist = BucketList.query.filter_by(created_by=uid, bid=id).first()
 
         # if logged in user owns the bucketlist
         if bucketlist:
             item = BucketListItem.query.filter_by(bid=id, iid=item_id).first()
-
             # get update data from request
             json_data = request.get_json()
 
@@ -484,7 +479,6 @@ class Bucketitemsactions(Resource):
         """
         # get id of logged in user
         uid = session['user_id']
-
         # select the item from database for modification
         bucketlist = BucketList.query.filter_by(created_by=uid, bid=id).first()
 
