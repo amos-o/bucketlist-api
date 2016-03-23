@@ -7,6 +7,7 @@ branches:
     - master
     - develop
     - feature-api
+    - feature-review
 
 # command to install dependencies
 install:
