@@ -458,8 +458,7 @@ class Bucketitemsactions(Resource):
                     item.name = json_data['name']
 
                 if 'done' in json_data:
-                    if json_data['done'] == "True":
-                        item.done = json_data['done']
+                    item.done = json_data['done']
 
                 db.session.add(item)
                 db.session.commit()
