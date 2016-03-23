@@ -52,11 +52,11 @@ class TestBucketlistActions(BaseTestCase):
         return logout_response
 
     def test_accessing_home_returns_welcome_message(self):
+        """Test that accessing home page returns a welcome message."""
         response = self.client.get(api.url_for(Home))
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('Welcome to the bucketlist API.', response.data)
-
 
     def test_unlogged_in_user_cant_access_bucketlists(self):
         """Test that an unlogged in user can't access bucketlists resource."""
@@ -71,13 +71,16 @@ class TestBucketlistActions(BaseTestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        token = json.loads(response.data)
+        reply = json.loads(response.data)
+        token = reply['token']
+
         self.assertTrue(token)
 
     def test_authorized_user_can_create_bucketlists(self):
         """Test that a logged in user can create a bucketlist."""
         response = self.login()
-        token = json.loads(response.data)
+        message = json.loads(response.data)
+        token = message['token']
 
         response2 = self.client.post(
                                      api.url_for(Allbucketlists),
@@ -91,7 +94,8 @@ class TestBucketlistActions(BaseTestCase):
     def test_authorized_user_can_access_all_bucketlists(self):
         """Test that a logged in user can see all his bucketlists."""
         response = self.login()
-        token = json.loads(response.data)
+        message = json.loads(response.data)
+        token = message['token']
 
         self.assertTrue(token)
 
@@ -115,7 +119,8 @@ class TestBucketlistActions(BaseTestCase):
     def test_authorized_user_can_access_bucketlist_by_id(self):
         """Test that a user can get one bucketlist by its id."""
         response = self.login()
-        token = json.loads(response.data)
+        message = json.loads(response.data)
+        token = message['token']
 
         self.assertTrue(token)
 
@@ -143,7 +148,8 @@ class TestBucketlistActions(BaseTestCase):
         """Test that updating a bucketlist works as expected."""
         # login and get the token
         response = self.login()
-        token = json.loads(response.data)
+        message = json.loads(response.data)
+        token = message['token']
 
         # create a test Bucketlist
         self.client.post(
@@ -179,7 +185,8 @@ class TestBucketlistActions(BaseTestCase):
         """Test that a user can delete a bucketlist."""
         # login and get the token
         response = self.login()
-        token = json.loads(response.data)
+        message = json.loads(response.data)
+        token = message['token']
 
         # create a test Bucketlist
         self.client.post(
@@ -201,7 +208,8 @@ class TestBucketlistActions(BaseTestCase):
     def test_logout_works(self):
         """Test that a logout request returns correct response."""
         response = self.login()
-        token = json.loads(response.data)
+        message = json.loads(response.data)
+        token = message['token']
 
         self.assertTrue(token)
 
