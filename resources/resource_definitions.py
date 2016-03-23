@@ -6,7 +6,8 @@ from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 from flask.ext.httpauth import HTTPBasicAuth
 from helpers.random_string_generator import id_generator
-from helpers.marshal_fields import item_fields, bucketlist_fields
+from helpers.marshal_fields import bucketlistitem_serializer,\
+    bucketlist_serializer
 
 # create auth object
 auth = HTTPBasicAuth()
@@ -175,7 +176,7 @@ class Allbucketlists(Resource):
     """
 
     @auth.login_required
-    @marshal_with(bucketlist_fields, envelope='bucketlists')
+    @marshal_with(bucketlist_serializer, envelope='bucketlists')
     def get(self):
         """
         Query all bucketlists.
@@ -282,7 +283,7 @@ class Onebucketlist(Resource):
         bucketlist = BucketList.query.filter_by(created_by=uid, bid=id).first()
 
         if bucketlist is not None:
-            return marshal(bucketlist, bucketlist_fields)
+            return marshal(bucketlist, bucketlist_serializer)
 
         return {"Error": "Nothing found"}, 404
 
@@ -313,7 +314,7 @@ class Onebucketlist(Resource):
             db.session.add(bucketlist)
             db.session.commit()
 
-            return marshal(bucketlist, bucketlist_fields)
+            return marshal(bucketlist, bucketlist_serializer)
 
         return {"Error": "Bucketlist not found"}, 404
 
@@ -403,7 +404,7 @@ class Bucketlistitem(Resource):
         updatedBucketList = \
             BucketList.query.filter_by(created_by=uid, bid=id).first()
 
-        return marshal(updatedBucketList, bucketlist_fields)
+        return marshal(updatedBucketList, bucketlist_serializer)
 
 
 class Bucketitemsactions(Resource):
@@ -461,7 +462,7 @@ class Bucketitemsactions(Resource):
                 db.session.add(item)
                 db.session.commit()
 
-                return marshal(item, item_fields)
+                return marshal(item, bucketlistitem_serializer)
 
         return {"Error": "Bucketlist item not found"}, 404
 
@@ -475,7 +476,7 @@ class Bucketitemsactions(Resource):
             id: The id of the bucketlist item belongs to.
             item_id: The ID of the item to be deleted.
 
-        Returns;
+        Returns:
             Message on success.
 
         Raises:
