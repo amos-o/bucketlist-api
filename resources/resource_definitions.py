@@ -6,7 +6,8 @@ from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 from flask.ext.httpauth import HTTPBasicAuth
 from helpers.random_string_generator import id_generator
-from helpers.marshal_fields import item_fields, bucketlist_fields
+from helpers.marshal_fields import bucketlistitem_serializer,\
+    bucketlist_serializer
 
 # create auth object
 auth = HTTPBasicAuth()
@@ -119,11 +120,11 @@ class Login(Resource):
         # if result will be true, generate a token
         if result:
             session['user_id'] = user.id
-
             session['serializer_key'] = id_generator()
 
             s = Serializer(session['serializer_key'], expires_in=6000)
-            return s.dumps({'id': user.id})
+            token = s.dumps({'id': user.id})
+            return jsonify({"token": token})
 
         return jsonify({"message": "Invalid login details."})
 
@@ -175,7 +176,6 @@ class Allbucketlists(Resource):
     """
 
     @auth.login_required
-    @marshal_with(bucketlist_fields, envelope='bucketlists')
     def get(self):
         """
         Query all bucketlists.
@@ -188,18 +188,26 @@ class Allbucketlists(Resource):
         """
         # get id of logged in user
         uid = session['user_id']
-
         # if limit exists, assign it to limit
-        limit = request.args.get('limit')
+        try:
+            limit = int(request.args.get('limit', 20))
+
+            if limit < 1:
+                limit = 20
+
+            if limit > 100:
+                limit = 100
+        except:
+            limit = 20
         # if q exists, assign it to q
         q = request.args.get('q')
+        # if page exists, assign it to page
+        try:
+            page = int(request.args.get('page'))
+        except:
+            page = 1
 
-        if limit is not None:
-            bucketlists = BucketList.query.filter_by(created_by=uid). \
-                limit(limit).all()
-
-            return bucketlists
-
+        # when q is defined, search for relevant bucketlists
         if q is not None:
             bucketlists = BucketList.query.filter_by(created_by=uid).all()
 
@@ -210,13 +218,13 @@ class Allbucketlists(Resource):
                 if q in bucket.name:
                     listOfResults.append(bucket)
 
-            return listOfResults
+            return marshal(listOfResults, bucketlist_serializer)
 
         # if limit and search query are not specified,
         # query and return all bucketlists
-        bucketlists = BucketList.query.filter_by(created_by=uid).all()
+        bucketlists = BucketList.query.filter_by(created_by=uid).paginate(page, limit, False).items
 
-        return bucketlists
+        return marshal(bucketlists, bucketlist_serializer)
 
     @auth.login_required
     def post(self):
@@ -231,7 +239,6 @@ class Allbucketlists(Resource):
         """
         # get data from json request
         json_data = request.get_json()
-
         # get name of bucketlist from json data
         name = json_data['name']
         # get owner id from logged in user session
@@ -282,7 +289,7 @@ class Onebucketlist(Resource):
         bucketlist = BucketList.query.filter_by(created_by=uid, bid=id).first()
 
         if bucketlist is not None:
-            return marshal(bucketlist, bucketlist_fields)
+            return marshal(bucketlist, bucketlist_serializer)
 
         return {"Error": "Nothing found"}, 404
 
@@ -303,8 +310,8 @@ class Onebucketlist(Resource):
         """
         # get id of logged in user
         uid = session['user_id']
-
         json_data = request.get_json()
+
         bucketlist = BucketList.query.filter_by(created_by=uid, bid=id).first()
 
         if bucketlist is not None:
@@ -313,7 +320,7 @@ class Onebucketlist(Resource):
             db.session.add(bucketlist)
             db.session.commit()
 
-            return marshal(bucketlist, bucketlist_fields)
+            return marshal(bucketlist, bucketlist_serializer)
 
         return {"Error": "Bucketlist not found"}, 404
 
@@ -378,10 +385,8 @@ class Bucketlistitem(Resource):
         """
         # get id of logged in user
         uid = session['user_id']
-
         # get the data for new item from request
         json_data = request.get_json()
-
         # item data
         itemname = json_data['name']
 
@@ -403,7 +408,7 @@ class Bucketlistitem(Resource):
         updatedBucketList = \
             BucketList.query.filter_by(created_by=uid, bid=id).first()
 
-        return marshal(updatedBucketList, bucketlist_fields)
+        return marshal(updatedBucketList, bucketlist_serializer)
 
 
 class Bucketitemsactions(Resource):
@@ -438,14 +443,12 @@ class Bucketitemsactions(Resource):
         """
         # get id of logged in user
         uid = session['user_id']
-
         # select the item from database for modification
         bucketlist = BucketList.query.filter_by(created_by=uid, bid=id).first()
 
         # if logged in user owns the bucketlist
         if bucketlist:
             item = BucketListItem.query.filter_by(bid=id, iid=item_id).first()
-
             # get update data from request
             json_data = request.get_json()
 
@@ -461,7 +464,7 @@ class Bucketitemsactions(Resource):
                 db.session.add(item)
                 db.session.commit()
 
-                return marshal(item, item_fields)
+                return marshal(item, bucketlistitem_serializer)
 
         return {"Error": "Bucketlist item not found"}, 404
 
@@ -475,7 +478,7 @@ class Bucketitemsactions(Resource):
             id: The id of the bucketlist item belongs to.
             item_id: The ID of the item to be deleted.
 
-        Returns;
+        Returns:
             Message on success.
 
         Raises:
@@ -483,7 +486,6 @@ class Bucketitemsactions(Resource):
         """
         # get id of logged in user
         uid = session['user_id']
-
         # select the item from database for modification
         bucketlist = BucketList.query.filter_by(created_by=uid, bid=id).first()
 

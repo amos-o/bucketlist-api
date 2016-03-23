@@ -54,7 +54,8 @@ class TestBucketlistItemActions(BaseTestCase):
     def test_user_can_create_bucketlist_item(self):
         """Test that a user can create bucketlist items."""
         response = self.login()
-        token = json.loads(response.data)
+        message = json.loads(response.data)
+        token = message['token']
 
         # create a test Bucketlist
         self.client.post(
@@ -80,7 +81,8 @@ class TestBucketlistItemActions(BaseTestCase):
     def test_user_can_update_a_bucketlist_item(self):
         """Test that a user can update bucketlist items"""
         response = self.login()
-        token = json.loads(response.data)
+        message = json.loads(response.data)
+        token = message['token']
 
         # create a test Bucketlist
         self.client.post(
@@ -114,7 +116,8 @@ class TestBucketlistItemActions(BaseTestCase):
     def test_user_can_delete_a_bucketlist_item(self):
         """Test that a user can delete a bucketlist item."""
         response = self.login()
-        token = json.loads(response.data)
+        message = json.loads(response.data)
+        token = message['token']
 
         # create a test Bucketlist
         self.client.post(
@@ -147,7 +150,8 @@ class TestBucketlistItemActions(BaseTestCase):
     def test_for_error_conditions(self):
         """Test for error conditions."""
         response = self.login()
-        token = json.loads(response.data)
+        message = json.loads(response.data)
+        token = message['token']
 
         # create a test Bucketlist
         self.client.post(
