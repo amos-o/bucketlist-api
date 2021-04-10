@@ -12,7 +12,7 @@ Flask-Restless==0.17.0
 Flask-SQLAlchemy==2.1
 Flask-Testing==0.4.2
 itsdangerous==0.24
-Jinja2==2.8
+Jinja2==2.11.3
 MarkupSafe==0.23
 marshmallow==2.6.0
 marshmallow-sqlalchemy==0.8.1
